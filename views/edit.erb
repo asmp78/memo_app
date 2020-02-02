@@ -1,0 +1,17 @@
+<form method="post" action="/<%= @memo[:id] %>/edit">   
+  <div class="form">
+    <label for="title">タイトル</label>
+    <br/>
+    <input type="text" name="title" class="form_title" value="<%= @memo[:title] %>" />
+    <label for="body">本文</label>
+    <br/>
+    <textarea name="body" rows="5" class="form_body" ><%= @memo[:body] %></textarea>
+    <br/>
+  </div>
+  <div class="btn_items">
+    <input type="hidden" name="_method" value="put">  
+    <input type="hidden" name="id" value="<%= @memo[:id] %>">
+    <input type="submit" class="btn" value="変更">
+    <a class="btn" href="/" role="button">中止</a>
+  </div>
+</form>

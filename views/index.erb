@@ -1,0 +1,7 @@
+<a class="btn" href="/new" role="button">新規作成</a>
+<ul class="memo_items">
+  <% @json_dir.each do |path| %>
+    <% memo = JSON.parse(File.read(path), symbolize_names: true) %>
+    <li class="memo_item"><a href="/<%= memo[:id] %>"><%= memo[:title] %></a></li>
+  <% end %>
+</ul>
