@@ -9,19 +9,21 @@ before do
   params[:id] == nil ? @id = SecureRandom.hex(10) : @id = params[:id]
   params[:title] == "" ? @title = "non title" : @title = params[:title]
   @body = params[:body]
-  @hush = { id: @id, title: @title, body: @body }
 end
 
-def write_memo(id)
-  File.open("memos/#{id}.json", "w") { |file| JSON.dump(@hush, file) }
-end
+class Memo
+  def write(id, title, body)
+    hash = { id: id, title: title, body: body }
+    File.open("memos/#{id}.json", "w") { |file| JSON.dump(hash, file) }
+  end
 
-def open_memo(id)
-  File.open("memos/#{id}.json") { |file| @memo = JSON.parse(File.read(file), symbolize_names: true) }
-end
+  def open(id)
+    File.open("memos/#{id}.json") { |file| JSON.parse(File.read(file), symbolize_names: true) }
+  end
 
-def delete_memo(id)
-  File.delete("memos/#{id}.json")
+  def delete(id)
+    File.delete("memos/#{id}.json")
+  end
 end
 
 get "/" do
@@ -34,28 +36,27 @@ get "/new" do
 end
 
 post "/new" do
-  write_memo(@id)
+  Memo.new.write(@id, @title, @body)
   erb :new
   redirect "/"
 end
 
 get "/:id" do
-  open_memo(params[:id])
+  @memo = Memo.new.open(params[:id])
   erb :show
 end
 
 get "/:id/edit" do
-  open_memo(params[:id])
+  @memo = Memo.new.open(params[:id])
   erb :edit
 end
 
 put "/:id/edit" do
-  p @title
-  write_memo(params[:id])
+  Memo.new.write(params[:id], @title, @body)
   redirect "/#{params[:id]}"
 end
 
 delete "/:id" do
-  delete_memo(params[:id])
+  Memo.new.delete(params[:id])
   redirect "/"
 end
