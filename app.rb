@@ -6,19 +6,20 @@ require "json"
 require "securerandom"
 
 before do
-  params[:id] == nil ? @id = SecureRandom.hex(10) : @id = params[:id]
-  params[:title] == "" ? @title = "non title" : @title = params[:title]
+  @id = SecureRandom.hex(10)
+  @title = params[:title]
+  @title = "non title" if @title == ""
   @body = params[:body]
 end
 
 class Memo
-  def write(id, title, body)
+  def self.write(id: id, title: title, body: body)
     hash = { id: id, title: title, body: body }
     File.open("memos/#{id}.json", "w") { |file| JSON.dump(hash, file) }
   end
 
-  def open(id)
-    File.open("memos/#{id}.json") { |file| JSON.parse(File.read(file), symbolize_names: true) }
+  def self.find(id)
+    File.open("memos/#{id}.json") { |file| JSON.parse(file.read, symbolize_names: true) }
   end
 
   def delete(id)
@@ -27,7 +28,7 @@ class Memo
 end
 
 get "/" do
-  @json_dir = Dir.glob("memos/*.json").sort_by { |f| File.mtime(f) }.reverse
+  @json_dir = Dir.glob("memos/*.json").sort_by { |file| File.mtime(file) }.reverse
   erb :index
 end
 
@@ -36,23 +37,23 @@ get "/new" do
 end
 
 post "/new" do
-  Memo.new.write(@id, @title, @body)
+  Memo.write(id: @id, title: @title, body: @body)
   erb :new
   redirect "/"
 end
 
 get "/:id" do
-  @memo = Memo.new.open(params[:id])
+  @memo = Memo.find(params[:id])
   erb :show
 end
 
 get "/:id/edit" do
-  @memo = Memo.new.open(params[:id])
+  @memo = Memo.find(params[:id])
   erb :edit
 end
 
 put "/:id/edit" do
-  Memo.new.write(params[:id], @title, @body)
+  Memo.write(id: params[:id], title: @title, body: @body)
   redirect "/#{params[:id]}"
 end
 
